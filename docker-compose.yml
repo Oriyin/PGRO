@@ -1,0 +1,36 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/src
+      - /src/node_modules 
+    working_dir: /src
+    command: npm run dev
+
+  db:
+    image: postgres:13
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: Yin
+      POSTGRES_PASSWORD: 66011050
+      POSTGRES_DB: PGRO
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/src
+    command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

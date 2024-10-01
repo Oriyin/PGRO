@@ -1,0 +1,17 @@
+.container {
+    height: 120vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: url('/Admin.jpg');
+    background-size: cover;
+  }
+  
+  .paper {
+    padding: 20px;
+  }
+  
+  .button {
+    margin-top: 16px;
+  }
+  
