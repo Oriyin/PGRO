@@ -119,7 +119,13 @@ async def insert_product(name: str, price: float, quantity: int, description: st
     VALUES (:name, :price, :quantity, :description, :image_url)
     RETURNING id, name, price, quantity, description, image_url
     """
-    values = {"name": name, "price": price, "quantity": quantity, "description": description, "image_url": image_url}
+    values = {
+        "name": name,
+        "price": price,
+        "quantity": quantity,
+        "description": description,
+        "image_url": image_url
+    }
     return await database.fetch_one(query=query, values=values)
 
 # Delete a product
@@ -144,3 +150,8 @@ async def update_product(product_id: int, name: str, price: float, quantity: int
         "image_url": image_url
     }
     return await database.fetch_one(query=query, values=values)
+
+# Get product by ID
+async def get_product_by_id(product_id: int):
+    query = "SELECT * FROM products WHERE id = :product_id"
+    return await database.fetch_one(query=query, values={"product_id": product_id})
