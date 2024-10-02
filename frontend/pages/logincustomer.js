@@ -43,7 +43,7 @@ export default function AuthPage() {
       setSnackbarSeverity('success');
       setOpenSnackbar(true);
       // เปลี่ยนเส้นทางไปยังหน้าถัดไปหลังจากล็อกอินสำเร็จ
-      router.push('/store'); // ปรับเปลี่ยนเส้นทางตามต้องการ
+      router.push('/home'); // ปรับเปลี่ยนเส้นทางตามต้องการ
     } catch (error) {
       setSnackbarMessage(error.message);
       setSnackbarSeverity('error');

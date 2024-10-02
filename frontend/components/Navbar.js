@@ -1,5 +1,6 @@
 import React from 'react';
 import Head from 'next/head';
+import Link from 'next/link'; // นำเข้า Link จาก next/link
 import styles from '../styles/navbar.module.css'; // Import CSS
 
 export default function Navbar() {
@@ -22,10 +23,18 @@ export default function Navbar() {
         </a>
         <div className="bx bx-menu" id="menu-icon"></div>
         <ul className={styles.navbar}>
-          <li><a href="#Home" className="home-active">Home</a></li>
-          <li><a href="#All Products">All Products</a></li>
-          <li><a href="#AboutUs">About Us</a></li>
-          <li><a href="#Cart">Cart</a></li>
+          <li>
+            <Link href="/home" className={styles.navLink}>Home</Link>
+          </li>
+          <li>
+            <Link href="/productpage" className={styles.navLink}>All Products</Link>
+          </li>
+          <li>
+            <Link href="/about" className={styles.navLink}>About Us</Link>
+          </li>
+          <li>
+            <Link href="/cart" className={styles.navLink}>Cart</Link>
+          </li>
         </ul>
         <div className={styles.profile}>
           <img src="/Profile.png" alt="Profile" />

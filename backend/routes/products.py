@@ -37,3 +37,4 @@ async def update_product_endpoint(product_id: int, product: dict):
 async def delete_product_endpoint(product_id: int):
     deleted_product = await delete_product(product_id)
     return {"message": "Product deleted", "product": deleted_product}
+

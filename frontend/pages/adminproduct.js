@@ -1,12 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Box } from '@mui/material';
-import AddProductModal from './AddProductModal'; // อาจจะยังคงใช้สำหรับการเพิ่มผลิตภัณฑ์
-import EditProductModal from './EditProductModal'; // นำเข้า Modal ใหม่
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Button,
+    Box,
+} from '@mui/material'; // Ensure this import is correct
+import AddProductModal from './AddProductModal'; 
+import EditProductModal from './EditProductModal'; 
 
 const ProductTable = () => {
     const [products, setProducts] = useState([]);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false); // เพิ่ม state สำหรับ Modal แก้ไข
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [currentProduct, setCurrentProduct] = useState(null);
 
@@ -52,7 +62,7 @@ const ProductTable = () => {
 
     const openEditModal = (product) => {
         setCurrentProduct(product);
-        setIsEditModalOpen(true); // เปิด Modal แก้ไข
+        setIsEditModalOpen(true);
     };
 
     return (
@@ -94,7 +104,7 @@ const ProductTable = () => {
                                         <Button 
                                             variant="contained" 
                                             color="secondary" 
-                                            onClick={() => openEditModal(product)} // เปิด Modal แก้ไข
+                                            onClick={() => openEditModal(product)} 
                                             style={{ marginRight: '8px' }}
                                         >
                                             Edit
@@ -118,7 +128,7 @@ const ProductTable = () => {
                     variant="contained" 
                     color="secondary" 
                     onClick={() => {
-                        setCurrentProduct(null); // Reset สำหรับการเพิ่มผลิตภัณฑ์ใหม่
+                        setCurrentProduct(null); 
                         setIsAddModalOpen(true);
                     }}
                     style={{ backgroundColor: '#f50057' }}
@@ -129,13 +139,13 @@ const ProductTable = () => {
             <AddProductModal
                 isOpen={isAddModalOpen}
                 onRequestClose={() => setIsAddModalOpen(false)}
-                onAddProduct={handleAddProduct} // ใช้ฟังก์ชันสำหรับเพิ่มผลิตภัณฑ์
+                onAddProduct={handleAddProduct}
             />
             <EditProductModal
                 isOpen={isEditModalOpen}
                 onRequestClose={() => setIsEditModalOpen(false)}
-                onEditProduct={handleEditProduct} // ฟังก์ชันสำหรับแก้ไขผลิตภัณฑ์
-                product={currentProduct} // ส่งข้อมูลผลิตภัณฑ์ที่กำลังแก้ไขไปยัง Modal
+                onEditProduct={handleEditProduct}
+                product={currentProduct}
             />
         </div>
     );
