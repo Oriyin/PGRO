@@ -88,7 +88,7 @@ async def login_user(user: UserLogin):
    db_user = await get_user_by_email(user.email,user.password_hash)
   
    if db_user is None:
-       raise HTTPException(status_code=404, detail="User not found")
+       raise HTTPException(status_code=404, detail="Wrong password")
 
 
    # If login is successful, you can return user info (omit password hash)

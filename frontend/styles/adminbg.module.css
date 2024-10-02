@@ -15,3 +15,14 @@
     margin-top: 16px;
   }
   
+  .loginButton {
+    background-color: #430F47; /* สีของปุ่ม Login */
+    color: white;
+  }
+  
+  .registerButton {
+    background-color: #430F47; /* สีของปุ่ม Register */
+    color: white;
+  }
+  
+  
