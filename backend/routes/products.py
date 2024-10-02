@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from database import get_products, insert_product, delete_product, update_product
+from database import *
 
 router = APIRouter()
 
@@ -37,3 +37,13 @@ async def update_product_endpoint(product_id: int, product: dict):
 async def delete_product_endpoint(product_id: int):
     deleted_product = await delete_product(product_id)
     return {"message": "Product deleted", "product": deleted_product}
+<<<<<<< Updated upstream
+=======
+
+@router.get("/products/{product_id}")
+async def read_product(product_id: int):
+    product = await get_product_by_id(product_id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return product
+>>>>>>> Stashed changes

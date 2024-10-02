@@ -1,12 +1,22 @@
 import React, { useEffect, useState } from 'react';
+<<<<<<< Updated upstream
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Box } from '@mui/material';
 import AddProductModal from './AddProductModal'; // อาจจะยังคงใช้สำหรับการเพิ่มผลิตภัณฑ์
 import EditProductModal from './EditProductModal'; // นำเข้า Modal ใหม่
+=======
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Box } from '@mui/material'; 
+import AddProductModal from './AddProductModal'; 
+import EditProductModal from './EditProductModal'; 
+>>>>>>> Stashed changes
 
 const ProductTable = () => {
     const [products, setProducts] = useState([]);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+<<<<<<< Updated upstream
     const [isEditModalOpen, setIsEditModalOpen] = useState(false); // เพิ่ม state สำหรับ Modal แก้ไข
+=======
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false); 
+>>>>>>> Stashed changes
     const [loading, setLoading] = useState(true);
     const [currentProduct, setCurrentProduct] = useState(null);
 
@@ -129,13 +139,22 @@ const ProductTable = () => {
             <AddProductModal
                 isOpen={isAddModalOpen}
                 onRequestClose={() => setIsAddModalOpen(false)}
+<<<<<<< Updated upstream
                 onAddProduct={handleAddProduct} // ใช้ฟังก์ชันสำหรับเพิ่มผลิตภัณฑ์
+=======
+                onAddProduct={handleAddProduct} 
+>>>>>>> Stashed changes
             />
             <EditProductModal
                 isOpen={isEditModalOpen}
                 onRequestClose={() => setIsEditModalOpen(false)}
+<<<<<<< Updated upstream
                 onEditProduct={handleEditProduct} // ฟังก์ชันสำหรับแก้ไขผลิตภัณฑ์
                 product={currentProduct} // ส่งข้อมูลผลิตภัณฑ์ที่กำลังแก้ไขไปยัง Modal
+=======
+                onEditProduct={handleEditProduct} 
+                product={currentProduct} 
+>>>>>>> Stashed changes
             />
         </div>
     );

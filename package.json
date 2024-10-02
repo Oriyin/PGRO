@@ -2,7 +2,13 @@
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+<<<<<<< Updated upstream
     "@mui/material": "^6.1.1",
     "react-modal": "^3.16.1"
+=======
+    "@mui/material": "^6.1.2",
+    "react-modal": "^3.16.1",
+    "swiper": "^11.1.14"
+>>>>>>> Stashed changes
   }
 }
