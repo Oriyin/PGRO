@@ -7,22 +7,17 @@ POSTGRES_DB = "PGRO"
 POSTGRES_HOST = "db"
 
 DATABASE_URL = f'postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB}'
-
-# Create a Database instance
 database = Database(DATABASE_URL)
 
-# Connect to the database
 async def connect_db():
     await database.connect()
     print("Database connected")
 
-# Disconnect from the database
 async def disconnect_db():
     await database.disconnect()
     print("Database disconnected")
 
 # -------- User Functions -------- #
-# Insert a new user
 async def insert_user(username: str, password_hash: str, email: str):
     query = """
     INSERT INTO users (username, password_hash, email)
@@ -32,17 +27,14 @@ async def insert_user(username: str, password_hash: str, email: str):
     values = {"username": username, "password_hash": password_hash, "email": email}
     return await database.fetch_one(query=query, values=values)
 
-# Get user by username
 async def get_user(username: str):
     query = "SELECT * FROM users WHERE username = :username"
     return await database.fetch_one(query=query, values={"username": username})
 
-# Get user by email and password hash
 async def get_user_by_email(email: str, password_hash: str):
     query = "SELECT * FROM users WHERE email = :email AND password_hash = :password_hash"
     return await database.fetch_one(query=query, values={"email": email, "password_hash": password_hash})
 
-# Update user
 async def update_user(user_id: int, username: str, password_hash: str, email: str):
     query = """
     UPDATE users
@@ -53,13 +45,11 @@ async def update_user(user_id: int, username: str, password_hash: str, email: st
     values = {"user_id": user_id, "username": username, "password_hash": password_hash, "email": email}
     return await database.fetch_one(query=query, values=values)
 
-# Delete user
 async def delete_user(user_id: int):
     query = "DELETE FROM users WHERE user_id = :user_id RETURNING *"
     return await database.fetch_one(query=query, values={"user_id": user_id})
 
 # -------- Admin Functions -------- #
-# Insert a new admin
 async def insert_admin(adminusername: str, adminpassword: str, adminemail: str):
     query = """
     INSERT INTO admins (adminusername, adminpassword, adminemail)
@@ -69,17 +59,14 @@ async def insert_admin(adminusername: str, adminpassword: str, adminemail: str):
     values = {"adminusername": adminusername, "adminpassword": adminpassword, "adminemail": adminemail}
     return await database.fetch_one(query=query, values=values)
 
-# Get admin by username
 async def get_admin(adminusername: str):
     query = "SELECT * FROM admins WHERE adminusername = :adminusername"
     return await database.fetch_one(query=query, values={"adminusername": adminusername})
 
-# Get admin by email and password
 async def get_admin_by_email(adminemail: str, adminpassword: str):
     query = "SELECT * FROM admins WHERE adminemail = :adminemail AND adminpassword = :adminpassword"
     return await database.fetch_one(query=query, values={"adminemail": adminemail, "adminpassword": adminpassword})
 
-# Update admin
 async def update_admin(admin_id: int, adminusername: str, adminpassword: str, adminemail: str):
     query = """
     UPDATE admins
@@ -90,13 +77,11 @@ async def update_admin(admin_id: int, adminusername: str, adminpassword: str, ad
     values = {"admin_id": admin_id, "adminusername": adminusername, "adminpassword": adminpassword, "adminemail": adminemail}
     return await database.fetch_one(query=query, values=values)
 
-# Delete admin
 async def delete_admin(admin_id: int):
     query = "DELETE FROM admins WHERE admin_id = :admin_id RETURNING *"
     return await database.fetch_one(query=query, values={"admin_id": admin_id})
 
 # -------- Product Functions -------- #
-# Get all products
 async def get_products():
     query = "SELECT * FROM products"
     rows = await database.fetch_all(query=query)
@@ -112,7 +97,6 @@ async def get_products():
         for row in rows
     ]
 
-# Insert a new product
 async def insert_product(name: str, price: float, quantity: int, description: str, image_url: str):
     query = """
     INSERT INTO products (name, price, quantity, description, image_url)
@@ -128,12 +112,10 @@ async def insert_product(name: str, price: float, quantity: int, description: st
     }
     return await database.fetch_one(query=query, values=values)
 
-# Delete a product
 async def delete_product(product_id: int):
     query = "DELETE FROM products WHERE id = :product_id RETURNING *"
     return await database.fetch_one(query=query, values={"product_id": product_id})
 
-# Update product
 async def update_product(product_id: int, name: str, price: float, quantity: int, description: str, image_url: str):
     query = """
     UPDATE products
@@ -151,7 +133,6 @@ async def update_product(product_id: int, name: str, price: float, quantity: int
     }
     return await database.fetch_one(query=query, values=values)
 
-# Get product by ID
 async def get_product_by_id(product_id: int):
     query = "SELECT * FROM products WHERE id = :product_id"
     return await database.fetch_one(query=query, values={"product_id": product_id})
@@ -175,11 +156,12 @@ async def get_cart_items_by_username(username: str):
     rows = await database.fetch_all(query=query, values={"username": username})
     return rows
 
-async def delete_cart_item(cart_item_id: int):
-    query = "DELETE FROM carts WHERE id = :cart_item_id RETURNING *"
-    return await database.fetch_one(query=query, values={"cart_item_id": cart_item_id})
+async def delete_cart_item(product_id: int, username: str):
+    async with database.transaction():
+        query = "DELETE FROM carts WHERE product_id = :product_id AND username = :username RETURNING *"
+        result = await database.fetch_one(query=query, values={"product_id": product_id, "username": username})
+        return result
 
-# Get cart item by product ID and username
 async def get_cart_by_product_id_and_username(product_id: int, username: str):
     query = """
     SELECT * FROM carts 
@@ -187,8 +169,8 @@ async def get_cart_by_product_id_and_username(product_id: int, username: str):
     """
     return await database.fetch_one(query=query, values={"product_id": product_id, "username": username})
 
-# Update cart quantity
 async def update_cart_quantity(product_id: int, quantity: int, username: str):
+    print(f"Updating product_id: {product_id}, quantity: {quantity}, username: {username}")  # Debug line
     query = """
     UPDATE carts 
     SET quantity = :quantity 
