@@ -45,9 +45,8 @@ const ProductPage = () => {
     const handleConfirmAddToCart = async () => {
         if (product) {
             const cartItem = {
-                product_name: product.name,
+                product_id: product.id,
                 quantity: quantity,
-                price: product.price,
                 username: localStorage.getItem('username'), // Get username from local storage
             };
 
@@ -124,7 +123,7 @@ const ProductPage = () => {
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
                             <Button 
                                 variant="contained" 
-                                color="primary" 
+                                style={{ backgroundColor: '#6a1b9a', color: '#fff' }} // Set the button color to purple
                                 onClick={handleAddToCart}
                                 disabled={product.quantity <= 0} // Disable button if out of stock
                             >

@@ -38,9 +38,8 @@ const Store = () => {
     const handleConfirmAddToCart = async () => {
         if (selectedProduct) {
             const cartItem = {
-                product_name: selectedProduct.name,
+                product_id: selectedProduct.id, // เปลี่ยนเป็น product_id
                 quantity: quantity,
-                price: selectedProduct.price,
                 username: localStorage.getItem('username'),
             };
 

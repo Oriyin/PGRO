@@ -64,9 +64,8 @@ const Store = () => {
   const handleConfirmAddToCart = async () => {
     if (selectedProduct) {
       const cartItem = {
-        product_name: selectedProduct.name,
+        product_id: selectedProduct.id, // Use product ID
         quantity: quantity,
-        price: selectedProduct.price,
         username: localStorage.getItem('username'),
       };
 
@@ -205,7 +204,7 @@ const Store = () => {
                   />
                   <CardContent sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <Typography variant="h6" noWrap sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#9c27b0' }}>{product.name}</Typography>
-                    <Typography>${product.price}</Typography>
+                    <Typography>฿{product.price.toFixed(2)}</Typography>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
                       <Button 
                         variant="contained" 
@@ -231,9 +230,9 @@ const Store = () => {
                             backgroundColor: '#9c27b0', // Purple background on hover
                           }
                         }} 
-                        onClick={() => handleViewProduct(product)}
+                        onClick={() => handleViewProduct(product)} 
                       >
-                        View PRODUCT
+                        View Product
                       </Button>
                     </Box>
                   </CardContent>
@@ -246,27 +245,28 @@ const Store = () => {
         </Box>
       )}
 
-      {/* Quantity Dialog */}
+      {/* Dialog for quantity selection */}
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogTitle>Add to Cart</DialogTitle>
         <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="quantity"
-            label="Quantity"
-            type="number"
-            value={quantity}
-            onChange={(e) => setQuantity(Math.max(1, e.target.value))}
-            fullWidth
-            variant="outlined"
+          <Typography variant="body1">
+            Enter quantity for {selectedProduct?.name}:
+          </Typography>
+          <TextField 
+            autoFocus 
+            margin="dense" 
+            label="Quantity" 
+            type="number" 
+            fullWidth 
+            value={quantity} 
+            onChange={(e) => setQuantity(Math.max(1, Math.min(99, e.target.value)))}
           />
           {error && <Typography color="error">{error}</Typography>}
-          {successMessage && <Typography color="success">{successMessage}</Typography>}
+          {successMessage && <Typography color="primary">{successMessage}</Typography>}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={handleConfirmAddToCart}>Add to Cart</Button>
+          <Button onClick={() => setOpen(false)} color="primary">Cancel</Button>
+          <Button onClick={handleConfirmAddToCart} color="primary">Add to Cart</Button>
         </DialogActions>
       </Dialog>
     </>
