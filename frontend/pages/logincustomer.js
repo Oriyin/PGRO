@@ -19,6 +19,7 @@ export default function AuthPage() {
     setOpenSnackbar(false);
   };
 
+  // ฟังก์ชันสำหรับจัดการการล็อกอิน
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -39,11 +40,12 @@ export default function AuthPage() {
       }
 
       const data = await response.json();
+      localStorage.setItem('userId', data.user_id); // เก็บ user ID ใน localStorage
+      localStorage.setItem('username', data.username); // เก็บ username ใน localStorage
       setSnackbarMessage('Login successful!');
       setSnackbarSeverity('success');
       setOpenSnackbar(true);
-      // เปลี่ยนเส้นทางไปยังหน้าถัดไปหลังจากล็อกอินสำเร็จ
-      router.push('/home'); // ปรับเปลี่ยนเส้นทางตามต้องการ
+      router.push('/home'); // เปลี่ยนเส้นทางไปยังหน้าถัดไปหลังจากล็อกอินสำเร็จ
     } catch (error) {
       setSnackbarMessage(error.message);
       setSnackbarSeverity('error');
@@ -51,6 +53,7 @@ export default function AuthPage() {
     }
   };
 
+  // ฟังก์ชันสำหรับจัดการการลงทะเบียน
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     if (registerPassword !== registerConfirmPassword) {
@@ -78,12 +81,10 @@ export default function AuthPage() {
         throw new Error(errorData.detail || 'Registration failed');
       }
 
-      const data = await response.json();
-      setSnackbarMessage('Registration successful!');
+      localStorage.setItem('username', registerName); // เก็บ username หลังจากลงทะเบียนสำเร็จ
+      setSnackbarMessage('Registration successful! Please log in to continue.');
       setSnackbarSeverity('success');
       setOpenSnackbar(true);
-      // เปลี่ยนเส้นทางไปยังหน้าถัดไปหลังจากลงทะเบียนสำเร็จ
-      router.push('/store'); // ปรับเปลี่ยนเส้นทางตามต้องการ
     } catch (error) {
       setSnackbarMessage(error.message);
       setSnackbarSeverity('error');

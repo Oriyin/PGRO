@@ -119,7 +119,13 @@ async def insert_product(name: str, price: float, quantity: int, description: st
     VALUES (:name, :price, :quantity, :description, :image_url)
     RETURNING id, name, price, quantity, description, image_url
     """
-    values = {"name": name, "price": price, "quantity": quantity, "description": description, "image_url": image_url}
+    values = {
+        "name": name,
+        "price": price,
+        "quantity": quantity,
+        "description": description,
+        "image_url": image_url
+    }
     return await database.fetch_one(query=query, values=values)
 
 # Delete a product
@@ -143,4 +149,51 @@ async def update_product(product_id: int, name: str, price: float, quantity: int
         "description": description,
         "image_url": image_url
     }
+    return await database.fetch_one(query=query, values=values)
+
+# Get product by ID
+async def get_product_by_id(product_id: int):
+    query = "SELECT * FROM products WHERE id = :product_id"
+    return await database.fetch_one(query=query, values={"product_id": product_id})
+
+# -------- Cart Functions -------- #
+async def insert_to_cart(product_id: int, quantity: int, username: str):
+    query = """
+    INSERT INTO carts (product_id, quantity, username)
+    VALUES (:product_id, :quantity, :username)
+    RETURNING id, product_id, quantity, created_at
+    """
+    values = {
+        "product_id": product_id,
+        "quantity": quantity,
+        "username": username
+    }
+    return await database.fetch_one(query=query, values=values)
+
+async def get_cart_items_by_username(username: str):
+    query = "SELECT * FROM carts WHERE username = :username"
+    rows = await database.fetch_all(query=query, values={"username": username})
+    return rows
+
+async def delete_cart_item(cart_item_id: int):
+    query = "DELETE FROM carts WHERE id = :cart_item_id RETURNING *"
+    return await database.fetch_one(query=query, values={"cart_item_id": cart_item_id})
+
+# Get cart item by product ID and username
+async def get_cart_by_product_id_and_username(product_id: int, username: str):
+    query = """
+    SELECT * FROM carts 
+    WHERE product_id = :product_id AND username = :username
+    """
+    return await database.fetch_one(query=query, values={"product_id": product_id, "username": username})
+
+# Update cart quantity
+async def update_cart_quantity(product_id: int, quantity: int, username: str):
+    query = """
+    UPDATE carts 
+    SET quantity = :quantity 
+    WHERE product_id = :product_id AND username = :username
+    RETURNING id, product_id, quantity, username, created_at
+    """
+    values = {"product_id": product_id, "quantity": quantity, "username": username}
     return await database.fetch_one(query=query, values=values)
