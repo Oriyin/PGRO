@@ -156,11 +156,6 @@ async def get_cart_items_by_username(username: str):
     rows = await database.fetch_all(query=query, values={"username": username})
     return rows
 
-async def delete_cart_item(product_id: int, username: str):
-    async with database.transaction():
-        query = "DELETE FROM carts WHERE product_id = :product_id AND username = :username RETURNING *"
-        result = await database.fetch_one(query=query, values={"product_id": product_id, "username": username})
-        return result
 
 async def get_cart_by_product_id_and_username(product_id: int, username: str):
     query = """
@@ -178,4 +173,9 @@ async def update_cart_quantity(product_id: int, quantity: int, username: str):
     RETURNING id, product_id, quantity, username, created_at
     """
     values = {"product_id": product_id, "quantity": quantity, "username": username}
+    return await database.fetch_one(query=query, values=values)
+
+async def delete_cart_item(product_id: int, username: str):
+    query = "DELETE FROM carts WHERE product_id = :product_id AND username = :username RETURNING *"
+    values = {"product_id": product_id, "username": username}
     return await database.fetch_one(query=query, values=values)

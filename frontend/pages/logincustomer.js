@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TextField, Button, Grid, Typography, Paper, Snackbar, Alert } from '@mui/material';
-import { useRouter } from 'next/router'; // นำเข้า useRouter
+import { useRouter } from 'next/router'; // Import useRouter
 import styles from '../styles/bg.module.css';
 
 export default function AuthPage() {
-  const router = useRouter(); // ใช้ useRouter
+  const router = useRouter(); // Use useRouter
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [registerName, setRegisterName] = useState('');
@@ -19,7 +19,7 @@ export default function AuthPage() {
     setOpenSnackbar(false);
   };
 
-  // ฟังก์ชันสำหรับจัดการการล็อกอิน
+  // Function to handle login
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -40,12 +40,16 @@ export default function AuthPage() {
       }
 
       const data = await response.json();
-      localStorage.setItem('userId', data.user_id); // เก็บ user ID ใน localStorage
-      localStorage.setItem('username', data.username); // เก็บ username ใน localStorage
+      // Store user ID and username in localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('userId', data.user_id); // Store user ID in localStorage
+        localStorage.setItem('username', data.username); // Store username in localStorage
+      }
+      
       setSnackbarMessage('Login successful!');
       setSnackbarSeverity('success');
       setOpenSnackbar(true);
-      router.push('/home'); // เปลี่ยนเส้นทางไปยังหน้าถัดไปหลังจากล็อกอินสำเร็จ
+      router.push('/home'); // Redirect to home page after successful login
     } catch (error) {
       setSnackbarMessage(error.message);
       setSnackbarSeverity('error');
@@ -53,7 +57,7 @@ export default function AuthPage() {
     }
   };
 
-  // ฟังก์ชันสำหรับจัดการการลงทะเบียน
+  // Function to handle registration
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     if (registerPassword !== registerConfirmPassword) {
@@ -81,7 +85,11 @@ export default function AuthPage() {
         throw new Error(errorData.detail || 'Registration failed');
       }
 
-      localStorage.setItem('username', registerName); // เก็บ username หลังจากลงทะเบียนสำเร็จ
+      // Store username in localStorage after successful registration
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('username', registerName); // Store username after successful registration
+      }
+
       setSnackbarMessage('Registration successful! Please log in to continue.');
       setSnackbarSeverity('success');
       setOpenSnackbar(true);
@@ -93,7 +101,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className={styles.container}> {/* ใช้คลาสที่นี่ */}
+    <div className={styles.container}>
       <Grid container spacing={2} style={{ height: '100%', justifyContent: 'center', alignItems: 'center' }}>
         {/* Login Section */}
         <Grid item xs={12} sm={6}>
@@ -122,7 +130,7 @@ export default function AuthPage() {
               />
               <Button
                 variant="contained"
-                className={styles.loginButton} // ใช้ class จาก bg.module.css
+                className={styles.loginButton}
                 fullWidth
                 style={{ marginTop: '16px' }}
                 type="submit"
@@ -177,7 +185,7 @@ export default function AuthPage() {
               />
               <Button
                 variant="contained"
-                className={styles.registerButton} // ใช้ class จาก bg.module.css
+                className={styles.registerButton}
                 fullWidth
                 style={{ marginTop: '16px' }}
                 type="submit"
@@ -195,6 +203,6 @@ export default function AuthPage() {
           </Alert>
         </Snackbar>
       </Grid>
-    </div> // ปิด div ที่มีคลาส .container
+    </div>
   );
 }

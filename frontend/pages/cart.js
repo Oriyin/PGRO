@@ -12,38 +12,56 @@ import styles from '../styles/storebg.module.css';
 import Navbar from '../components/Navbar';
 
 const MyCart = () => {
-    const [cartItems, setCartItems] = useState([]); // State for cart items
-    const [loading, setLoading] = useState(true); // Loading state
-    const [totalAmount, setTotalAmount] = useState(0); // Total amount
-    const [error, setError] = useState(null); // Error message
-    const username = localStorage.getItem('username'); // Get username from local storage
+    const [cartItems, setCartItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [totalAmount, setTotalAmount] = useState(0);
+    const [error, setError] = useState(null);
+    const [username, setUsername] = useState(null); // Initialize username state
+
+    useEffect(() => {
+        // This code runs only on the client side
+        if (typeof window !== 'undefined') {
+            const storedUsername = localStorage.getItem('username');
+            if (storedUsername) {
+                setUsername(storedUsername);
+            } else {
+                setError('Username not found. Please log in again.');
+                setLoading(false);
+            }
+        }
+    }, []); // Empty dependency array ensures this runs once after the component mounts
+
+    useEffect(() => {
+        if (username) {
+            fetchCartItems();
+        }
+    }, [username]); // Fetch cart items when username is set
 
     const fetchCartItems = async () => {
+        if (!username) return; // Don't fetch if no username
+        
         try {
             const response = await fetch(`/api/carts?username=${username}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch cart items');
             }
             const data = await response.json();
-            setCartItems(data); // Set cart items to state
+            setCartItems(data);
         } catch (error) {
-            setError(error.message); // Set error message
+            setError(error.message);
         } finally {
-            setLoading(false); // Set loading to false after fetch
+            setLoading(false);
         }
     };
 
     const calculateTotal = (items) => {
         const total = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-        setTotalAmount(total); // Calculate and set total amount
+        setTotalAmount(total);
     };
 
     const handleEditQuantity = async (productId, newQuantity) => {
-        console.log("Product ID:", productId); // Debugging line
-        console.log("New Quantity:", newQuantity); // Debugging line
-
         if (newQuantity < 1) return; // Prevent negative quantities
-    
+        
         try {
             const response = await fetch(`/api/carts/${productId}`, {
                 method: 'PUT',
@@ -52,24 +70,28 @@ const MyCart = () => {
                 },
                 body: JSON.stringify({ quantity: newQuantity, username }),
             });
-    
+            
             if (!response.ok) {
-                throw new Error('Failed to update cart item quantity');
+                const errorText = await response.text();
+                throw new Error(errorText);
             }
-    
-            // Update state with new quantity
+            
+            const updatedItem = await response.json();
             setCartItems((prevItems) =>
                 prevItems.map((item) =>
-                    item.product_id === productId ? { ...item, quantity: newQuantity } : item
+                    item.product_id === productId ? { ...item, quantity: updatedItem.item.quantity } : item
                 )
             );
         } catch (error) {
-            setError('Error updating quantity: ' + error.message); // Set error message
+            setError('Error updating quantity: ' + error.message);
         }
     };
 
     const handleRemoveItem = async (productId) => {
-        if (!productId) return; // Prevent removal if no product ID
+        console.log('Attempting to remove item with product ID:', productId);
+        console.log('Current username:', username); // Debug line
+    
+        if (!productId || !username) return; // Prevent removal if no product ID or username
     
         try {
             const response = await fetch(`/api/carts/${productId}?username=${username}`, {
@@ -79,30 +101,24 @@ const MyCart = () => {
                 },
             });
     
+            console.log('Response status:', response.status); // ตรวจสอบสถานะคำขอ
             if (!response.ok) {
                 const errorText = await response.text();
+                console.error('Error response:', errorText); // ดูข้อความผิดพลาด
                 throw new Error(errorText);
             }
     
             // Update state to remove the item from the UI
             setCartItems((prevItems) => prevItems.filter((item) => item.product_id !== productId));
         } catch (error) {
-            setError('Error removing item: ' + error.message); // Set error message
+            setError('Error removing item: ' + error.message);
             console.error(error);
         }
     };
-
+    
+    
     useEffect(() => {
-        if (username) {
-            fetchCartItems(); // Fetch cart items if username is available
-        } else {
-            setError('Username not found. Please log in again.'); // Error if no username
-            setLoading(false);
-        }
-    }, [username]);
-
-    useEffect(() => {
-        calculateTotal(cartItems); // Calculate total whenever cart items change
+        calculateTotal(cartItems);
     }, [cartItems]);
 
     return (
@@ -111,17 +127,17 @@ const MyCart = () => {
             <Box sx={{ overflowY: 'auto', flexGrow: 1, padding: '20px', marginTop: '80px' }}>
                 <Card sx={{ width: '100%', maxWidth: '1200px', borderRadius: '8px', boxShadow: 3, margin: '0 auto' }}>
                     <CardHeader
-                        title={`My Cart for ${username}`} // Header with username
+                        title={`My Cart for ${username || 'Guest'}`}
                         titleTypographyProps={{ variant: 'h4', align: 'center', color: '#003366' }}
                         sx={{ backgroundColor: '#e0f7fa' }}
                     />
                     <CardContent>
                         {loading ? (
-                            <Typography variant="h6" align="center">Loading...</Typography> // Loading state
+                            <Typography variant="h6" align="center">Loading...</Typography>
                         ) : error ? (
-                            <Typography variant="h6" align="center" color="error">{error}</Typography> // Error state
+                            <Typography variant="h6" align="center" color="error">{error}</Typography>
                         ) : cartItems.length === 0 ? (
-                            <Typography variant="h6" align="center">Your cart is empty.</Typography> // Empty cart state
+                            <Typography variant="h6" align="center">Your cart is empty.</Typography>
                         ) : (
                             <Grid container spacing={2} justifyContent="center">
                                 {cartItems.map((item) => (
@@ -133,14 +149,32 @@ const MyCart = () => {
                                                 <Typography variant="body2">Quantity: {item.quantity}</Typography>
                                                 <Typography variant="body2">Price: ${(item.price * item.quantity).toFixed(2)}</Typography>
                                                 <Box display="flex" justifyContent="space-between" mt={1}>
-                                                    <Button variant="contained" onClick={() => handleEditQuantity(item.product_id, item.quantity + 1)} disabled={item.quantity >= item.stock}>+</Button>
-                                                    <Button variant="contained" onClick={() => handleEditQuantity(item.product_id, item.quantity - 1)} disabled={item.quantity <= 1}>-</Button>
-                                                    <Button variant="outlined" color="error" onClick={() => handleRemoveItem(item.product_id)}>Remove</Button>
+                                                    <Button 
+                                                        variant="contained" 
+                                                        onClick={() => handleEditQuantity(item.product_id, item.quantity + 1)} 
+                                                        disabled={item.quantity >= item.stock}
+                                                    >
+                                                        +
+                                                    </Button>
+                                                    <Button 
+                                                        variant="contained" 
+                                                        onClick={() => handleEditQuantity(item.product_id, item.quantity - 1)} 
+                                                        disabled={item.quantity <= 1}
+                                                    >
+                                                        -
+                                                    </Button>
+                                                    <Button 
+                                                        variant="outlined" 
+                                                        color="error" 
+                                                        onClick={() => handleRemoveItem(item.product_id)}
+                                                    >
+                                                        Remove
+                                                    </Button>
                                                 </Box>
                                             </CardContent>
                                         </Card>
                                     </Grid>
-                                ))}
+                                ))} 
                             </Grid>
                         )}
                     </CardContent>
@@ -148,7 +182,7 @@ const MyCart = () => {
                 {cartItems.length > 0 && (
                     <Box display="flex" justifyContent="flex-end" mt={2}>
                         <Typography variant="h5" style={{ marginRight: '20px', color: '#003366' }}>
-                            Total Amount: ${totalAmount.toFixed(2)} {/* Display total amount */}
+                            Total Amount: ${totalAmount.toFixed(2)}
                         </Typography>
                     </Box>
                 )}
