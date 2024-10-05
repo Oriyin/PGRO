@@ -2,8 +2,12 @@
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
-    "@mui/material": "^6.1.1",
+    "@mui/material": "^6.1.2",
+    "@mui/x-charts": "^7.19.0",
+    "chart.js": "^4.4.4",
+    "react-chartjs-2": "^5.2.0",
     "react-modal": "^3.16.1",
+    "recharts": "^2.12.7",
     "swiper": "^11.1.14"
   }
 }

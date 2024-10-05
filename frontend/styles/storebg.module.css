@@ -37,3 +37,16 @@
     z-index: 1; 
     margin-top: 20px; 
 }
+
+.productCard {
+    width: 200px; /* กำหนดความกว้างของการ์ด */
+    min-height: 300px; /* กำหนดความสูงขั้นต่ำของการ์ด */
+    background-color: white; /* สีพื้นหลังของการ์ด */
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column; /* จัดเรียงเนื้อหาภายในการ์ด */
+    justify-content: space-between; /* ให้มีการเว้นระยะ */
+    margin: 10px; /* เว้นระยะระหว่างการ์ด */
+}
+

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes import users, admin, products, carts
+from routes import users, admin, products, carts ,sale
 from database import connect_db, disconnect_db
 
 app = FastAPI()
@@ -23,3 +23,5 @@ app.include_router(admin.router, prefix="/api")
 app.include_router(products.router, prefix="/api")
 
 app.include_router(carts.router, prefix="/api")
+
+app.include_router(sale.router, prefix="/api")

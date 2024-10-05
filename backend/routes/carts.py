@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from database import *  # Ensure your database functions are correctly imported
+from typing import List
 
 router = APIRouter()
 
@@ -8,6 +9,15 @@ class CartItem(BaseModel):
     product_id: int
     quantity: int
     username: str
+
+class OrderItem(BaseModel):
+    product_id: int
+    quantity: int
+
+class CheckoutRequest(BaseModel):
+    username: str
+    items: List[OrderItem]
+    total_amount: float
 
 ## for adding products to cart
 @router.post("/carts")
@@ -43,24 +53,22 @@ async def add_to_cart(cart_item: CartItem):
 @router.get("/carts")
 async def read_cart_items(username: str):
     cart_items = await get_cart_items_by_username(username)
-    items_with_details = {}
+    items_with_details = []
 
     for item in cart_items:
-        product = await get_product_by_id(item.product_id)
+        product = await get_product_by_id(item.product_id)  # ต้องแน่ใจว่ามีการดึง product_id
         if product:
-            if item.product_id in items_with_details:
-                items_with_details[item.product_id]['quantity'] += item.quantity
-            else:
-                items_with_details[item.product_id] = {
-                    "id": item.id,
-                    "product_name": product['name'],
-                    "quantity": item.quantity,
-                    "price": product['price'],
-                    "created_at": item.created_at,
-                    "product_image": product['image_url'],
-                }
+            items_with_details.append({
+                "product_id": item.product_id,  # ตรวจสอบให้แน่ใจว่าได้เพิ่ม product_id
+                "id": item.id,
+                "product_name": product['name'],
+                "quantity": item.quantity,
+                "price": product['price'],
+                "created_at": item.created_at,
+                "product_image": product['image_url'],
+            })
 
-    return list(items_with_details.values())
+    return items_with_details
 
 ## remove at cart.js page
 @router.delete("/carts/{product_id}")
@@ -74,3 +82,47 @@ async def remove_cart_item(product_id: int, request: Request):
         raise HTTPException(status_code=404, detail="Item not found in cart")
 
     return {"message": "Item removed from cart successfully!"}  # ส่งค่ากลับเมื่อมีการลบสำเร็จ
+
+@router.put("/carts/{product_id}")
+async def update_cart_item(product_id: int, cart_item: CartItem):
+    username = cart_item.username
+    quantity = cart_item.quantity
+    
+    if quantity < 1:
+        raise HTTPException(status_code=400, detail="Quantity must be at least 1")
+
+    # Update the item in the cart
+    updated_item = await update_cart_quantity(product_id, quantity, username)
+    
+    if not updated_item:
+        raise HTTPException(status_code=404, detail="Item not found in cart")
+
+    return {"message": "Cart item updated successfully!", "item": updated_item}
+
+@router.post("/checkout")
+async def checkout(order: CheckoutRequest):
+    try:
+        # Create a new order (insert into orders table)
+        order_id = await create_order(username=order.username, total_amount=order.total_amount)
+
+        # Loop through the items and reduce stock
+        for item in order.items:
+            # Check if the product exists
+            product = await get_product_by_id(item.product_id)
+            if not product:
+                raise HTTPException(status_code=404, detail=f"Product ID {item.product_id} not found")
+
+            # Check stock availability
+            if product['quantity'] < item.quantity:
+                raise HTTPException(status_code=400, detail=f"Not enough stock for product ID {item.product_id}")
+
+            # Update the product stock
+            await update_product_quantity(product_id=item.product_id, quantity=item.quantity)
+
+        # Clear the user's cart after successful checkout
+        await clear_cart_for_user(order.username)
+
+        return {"message": "Checkout successful!", "order_id": order_id}
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

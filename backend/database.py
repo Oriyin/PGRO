@@ -156,7 +156,6 @@ async def get_cart_items_by_username(username: str):
     rows = await database.fetch_all(query=query, values={"username": username})
     return rows
 
-
 async def get_cart_by_product_id_and_username(product_id: int, username: str):
     query = """
     SELECT * FROM carts 
@@ -179,3 +178,26 @@ async def delete_cart_item(product_id: int, username: str):
     query = "DELETE FROM carts WHERE product_id = :product_id AND username = :username RETURNING *"
     values = {"product_id": product_id, "username": username}
     return await database.fetch_one(query=query, values=values)
+
+# -------- Order Functions -------- #
+async def create_order(username: str, total_amount: float):
+    query = """
+    INSERT INTO orders (username, total_amount)
+    VALUES (:username, :total_amount)
+    RETURNING id
+    """
+    values = {"username": username, "total_amount": total_amount}
+    return await database.fetch_one(query=query, values=values)
+
+async def update_product_quantity(product_id: int, quantity: int):
+    query = """
+    UPDATE products
+    SET quantity = quantity - :quantity
+    WHERE id = :product_id
+    """
+    values = {"product_id": product_id, "quantity": quantity}
+    await database.execute(query=query, values=values)
+
+async def clear_cart_for_user(username: str):
+    query = "DELETE FROM carts WHERE username = :username"
+    await database.execute(query=query, values={"username": username})
