@@ -20,7 +20,7 @@ const SalesReport = () => {
 
     const fetchSalesData = async () => {
         try {
-            const response = await fetch('/api/sales-report');
+            const response = await fetch('http://localhost:8000/api/sales-report'); // เปลี่ยน URL ตรงนี้
             if (!response.ok) {
                 throw new Error('Failed to fetch sales data');
             }

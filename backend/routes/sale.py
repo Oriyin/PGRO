@@ -2,19 +2,27 @@ from fastapi import APIRouter, HTTPException
 from database import database
 
 router = APIRouter()
+print("Sale router is included")
 
-@router.get("/sales-report")
-async def get_sales_report():
+
+@router.post("/checkout")
+async def checkout(username: str):
     try:
-        query = """
-        SELECT p.name AS product_name, SUM(c.quantity) AS total_sales
-        FROM orders o
-        JOIN carts c ON o.username = c.username
-        JOIN products p ON c.product_id = p.id
-        GROUP BY p.id
-        ORDER BY total_sales DESC
+        # ตัวอย่างการคิวรีเพื่อลบสินค้าจากตะกร้า
+        delete_cart_query = "DELETE FROM carts WHERE user_id = (SELECT user_id FROM users WHERE username = :username)"
+        await database.execute(query=delete_cart_query, values={"username": username})
+        
+        # คิวรีเพื่ออัปเดตยอดใน products
+        update_product_query = """
+        UPDATE products p
+        SET quantity = quantity - c.quantity
+        FROM carts c
+        WHERE c.product_id = p.id
+        AND c.user_id = (SELECT user_id FROM users WHERE username = :username)
         """
-        sales_report = await database.fetch_all(query=query)
-        return [{"product_name": row["product_name"], "total_sales": row["total_sales"]} for row in sales_report]
+        await database.execute(query=update_product_query, values={"username": username})
+
+        return {"message": "Checkout successful"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+

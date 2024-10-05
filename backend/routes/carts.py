@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from database import *  # Ensure your database functions are correctly imported
-from typing import List
 
 router = APIRouter()
 
@@ -10,13 +9,10 @@ class CartItem(BaseModel):
     quantity: int
     username: str
 
-class OrderItem(BaseModel):
-    product_id: int
-    quantity: int
-
-class CheckoutRequest(BaseModel):
+# New model for the Order
+class Order(BaseModel):
     username: str
-    items: List[OrderItem]
+    items: list[CartItem]
     total_amount: float
 
 ## for adding products to cart
@@ -70,6 +66,7 @@ async def read_cart_items(username: str):
 
     return items_with_details
 
+
 ## remove at cart.js page
 @router.delete("/carts/{product_id}")
 async def remove_cart_item(product_id: int, request: Request):
@@ -88,10 +85,11 @@ async def update_cart_item(product_id: int, cart_item: CartItem):
     username = cart_item.username
     quantity = cart_item.quantity
     
+    # ตรวจสอบว่าค่า quantity ต้องไม่น้อยกว่า 1
     if quantity < 1:
         raise HTTPException(status_code=400, detail="Quantity must be at least 1")
 
-    # Update the item in the cart
+    # อัพเดตสินค้าในตะกร้า
     updated_item = await update_cart_quantity(product_id, quantity, username)
     
     if not updated_item:
@@ -99,30 +97,37 @@ async def update_cart_item(product_id: int, cart_item: CartItem):
 
     return {"message": "Cart item updated successfully!", "item": updated_item}
 
+
+## New endpoint for checking out
 @router.post("/checkout")
-async def checkout(order: CheckoutRequest):
-    try:
-        # Create a new order (insert into orders table)
-        order_id = await create_order(username=order.username, total_amount=order.total_amount)
+async def checkout(order: Order):
+    # Validate the order and process it
+    if not order.username or not order.items:
+        raise HTTPException(status_code=400, detail="Invalid order data")
 
-        # Loop through the items and reduce stock
-        for item in order.items:
-            # Check if the product exists
-            product = await get_product_by_id(item.product_id)
-            if not product:
-                raise HTTPException(status_code=404, detail=f"Product ID {item.product_id} not found")
+    # Create the order
+    query = """
+    INSERT INTO orders (username, total_amount)
+    VALUES (:username, :total_amount)
+    RETURNING id
+    """
+    total_amount = order.total_amount
+    order_id = await database.execute(query, values={"username": order.username, "total_amount": total_amount})
 
-            # Check stock availability
-            if product['quantity'] < item.quantity:
-                raise HTTPException(status_code=400, detail=f"Not enough stock for product ID {item.product_id}")
+    # Update product quantities and remove items from the cart
+    for item in order.items:
+        product_id = item.product_id
+        quantity = item.quantity
 
-            # Update the product stock
-            await update_product_quantity(product_id=item.product_id, quantity=item.quantity)
+        # Update the product stock
+        product_query = """
+        UPDATE products
+        SET quantity = quantity - :quantity
+        WHERE id = :product_id
+        """
+        await database.execute(product_query, values={"product_id": product_id, "quantity": quantity})
 
-        # Clear the user's cart after successful checkout
-        await clear_cart_for_user(order.username)
+        # Remove the item from the user's cart
+        await delete_cart_item(product_id, order.username)
 
-        return {"message": "Checkout successful!", "order_id": order_id}
-
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    return {"message": "Order placed successfully!", "order_id": order_id}
