@@ -37,6 +37,12 @@ async def get_total_admins():
     result = await database.fetch_one(query)
     return {"totalAdmins": result["total_admins"]}
 
+import json
+from typing import List
+from fastapi import APIRouter, HTTPException
+from database import database
+
+router = APIRouter()
 
 @router.get("/orders/latest", response_model=list[dict])
 async def get_latest_orders(limit: int = 3):
@@ -95,5 +101,4 @@ async def get_latest_orders(limit: int = 3):
             "items": detailed_items  # Replace items with detailed items
         })
 
-    # Return only the list of orders (not wrapped in a dictionary)
-    return orders
+    return {"latestOrders": orders}

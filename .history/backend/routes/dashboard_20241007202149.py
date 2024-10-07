@@ -95,5 +95,4 @@ async def get_latest_orders(limit: int = 3):
             "items": detailed_items  # Replace items with detailed items
         })
 
-    # Return only the list of orders (not wrapped in a dictionary)
-    return orders
+    return {"latestOrders": orders}

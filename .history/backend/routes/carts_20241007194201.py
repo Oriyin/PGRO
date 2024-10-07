@@ -1,11 +1,10 @@
-import json
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
-from database import *  
+from database import *  # Ensure your database functions are correctly imported
 from datetime import datetime
 import pytz  
 router = APIRouter()
-
+import json
 
 class CartItem(BaseModel):
     product_id: int
@@ -109,27 +108,18 @@ async def checkout(order: Order):
     # Prepare the items as a JSON string
     items_json = json.dumps([{"product_id": item.product_id, "quantity": item.quantity} for item in order.items])
 
-    # Get the current time in Thailand's timezone
-    tz = pytz.timezone('Asia/Bangkok')
-    current_time = datetime.now(tz)  # This is timezone-aware
-
-    # Create the order, inserting items as JSON and created_at timestamp
+    # Create the order, inserting items as JSON
     query = """
-    INSERT INTO orders (username, total_amount, items, created_at)
-    VALUES (:username, :total_amount, :items, :created_at)
+    INSERT INTO orders (username, total_amount, items)
+    VALUES (:username, :total_amount, :items)
     RETURNING id
     """
-    
     total_amount = order.total_amount
-    try:
-        order_id = await database.execute(query, values={
-            "username": order.username, 
-            "total_amount": total_amount,
-            "items": items_json,  # Insert items as a JSON string
-            "created_at": current_time  # Directly use timezone-aware datetime
-        })
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error inserting order: {str(e)}")
+    order_id = await database.execute(query, values={
+        "username": order.username, 
+        "total_amount": total_amount,
+        "items": items_json  # Insert items as a JSON string
+    })
 
     # Update product quantities and remove items from the cart
     for item in order.items:

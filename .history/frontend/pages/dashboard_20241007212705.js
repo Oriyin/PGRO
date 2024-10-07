@@ -21,28 +21,21 @@ const colors = {
   blue: '#42A5F5',
   green: '#66BB6A',
   white: '#FFFFFF',
-  grey: '#F5F5F5', // New color for card background
 };
 
 // Styled components
 const StyledCard = styled(Card)( {
-  backgroundColor: colors.grey,
+  backgroundColor: colors.lightPurple,
   color: colors.purple,
   borderRadius: '16px',
-  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-  transition: 'transform 0.2s, box-shadow 0.2s',
-  '&:hover': {
-    transform: 'scale(1.02)',
-    boxShadow: '0 8px 40px rgba(0, 0, 0, 0.2)',
-  },
+  boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)',
 });
 
 const StyledAvatar = styled(Avatar)( {
   backgroundColor: colors.purple,
-  width: '60px',
-  height: '60px',
+  width: '50px',
+  height: '50px',
   marginRight: '10px',
-  boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
 });
 
 const PinkSwitch = styled(Switch)(({ theme }) => ({

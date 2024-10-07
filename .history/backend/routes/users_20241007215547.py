@@ -173,14 +173,3 @@ async def insert_user(username: str, password_hash: str, email: str, created_at:
     }
     return await database.fetch_one(query=query, values=values)
 
-@router.get("/users/new-registration")
-async def get_new_registrations():
-    query = """
-    SELECT DATE(created_at) AS registration_date, COUNT(*) AS new_users
-    FROM users
-    GROUP BY registration_date
-    ORDER BY registration_date ASC
-    """
-    results = await database.fetch_all(query)
-
-    return [{"registration_date": row["registration_date"], "new_users": row["new_users"]} for row in results]

@@ -11,18 +11,19 @@ async def get_total_sales():
     result = await database.fetch_one(query)
     return {"totalSales": result["total_sales"]}
 
-@router.get("/sales/data")
-async def get_sales_data():
+@router.get("/sales/quarterly-data")
+async def get_quarterly_sales_data():
     query = """
-    SELECT DATE(created_at) as date, SUM(total_amount) as sales
+    SELECT EXTRACT(QUARTER FROM created_at) as quarter, SUM(total_amount) as sales
     FROM orders
-    GROUP BY DATE(created_at)
-    ORDER BY date DESC
-    LIMIT 30
+    GROUP BY EXTRACT(QUARTER FROM created_at)
+    ORDER BY quarter DESC
+    LIMIT 4
     """
     results = await database.fetch_all(query)
-    sales_data = [{"date": row["date"], "sales": row["sales"]} for row in results]
-    return {"salesData": sales_data}
+    quarterly_data = [{"quarter": row["quarter"], "sales": row["sales"]} for row in results]
+    return {"quarterlyData": quarterly_data}
+
 
 @router.get("/sales/total-orders")
 async def get_total_orders():

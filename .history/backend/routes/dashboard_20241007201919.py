@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException
-from database import *
+from database import database
 import json
+from fastapi import APIRouter, HTTPException
+from database import database
 
 router = APIRouter()
 print("Sale router is included")
@@ -38,10 +40,13 @@ async def get_total_admins():
     return {"totalAdmins": result["total_admins"]}
 
 
+
+router = APIRouter()
+
 @router.get("/orders/latest", response_model=list[dict])
 async def get_latest_orders(limit: int = 3):
     """
-    Get the latest orders with item details (name, quantity, price, and image_url).
+    Get the latest orders with item details (name, quantity, price).
     By default, it will return the 3 most recent orders.
     """
     # Query to get the latest orders
@@ -64,15 +69,11 @@ async def get_latest_orders(limit: int = 3):
 
         # Process each item in the order
         for item in items:
-            product_id = item.get("product_id")
-            quantity = item.get("quantity")
+            product_id = item["product_id"]
+            quantity = item["quantity"]
 
-            # Skip items with invalid product_id
-            if not product_id or product_id == 0:
-                continue
-
-            # Query to get the product name, price, and image_url from the products table
-            product_query = "SELECT name, price, image_url FROM products WHERE id = :product_id"
+            # Query to get the product name and price from the products table
+            product_query = "SELECT name, price FROM products WHERE id = :product_id"
             product_data = await database.fetch_one(product_query, values={"product_id": product_id})
 
             if not product_data:
@@ -82,7 +83,6 @@ async def get_latest_orders(limit: int = 3):
                 "name": product_data["name"],
                 "quantity": quantity,
                 "price": product_data["price"],
-                "image_url": product_data["image_url"],
                 "total_price": product_data["price"] * quantity  # Calculate total price per item
             })
 
@@ -95,5 +95,4 @@ async def get_latest_orders(limit: int = 3):
             "items": detailed_items  # Replace items with detailed items
         })
 
-    # Return only the list of orders (not wrapped in a dictionary)
-    return orders
+    return {"latestOrders": orders}

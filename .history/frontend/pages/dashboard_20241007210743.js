@@ -21,28 +21,21 @@ const colors = {
   blue: '#42A5F5',
   green: '#66BB6A',
   white: '#FFFFFF',
-  grey: '#F5F5F5', // New color for card background
 };
 
 // Styled components
-const StyledCard = styled(Card)( {
-  backgroundColor: colors.grey,
+const StyledCard = styled(Card)({
+  backgroundColor: colors.lightPurple,
   color: colors.purple,
   borderRadius: '16px',
-  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-  transition: 'transform 0.2s, box-shadow 0.2s',
-  '&:hover': {
-    transform: 'scale(1.02)',
-    boxShadow: '0 8px 40px rgba(0, 0, 0, 0.2)',
-  },
+  boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)',
 });
 
-const StyledAvatar = styled(Avatar)( {
+const StyledAvatar = styled(Avatar)({
   backgroundColor: colors.purple,
-  width: '60px',
-  height: '60px',
+  width: '50px',
+  height: '50px',
   marginRight: '10px',
-  boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
 });
 
 const PinkSwitch = styled(Switch)(({ theme }) => ({
@@ -345,6 +338,61 @@ const Dashboard = () => {
               </Grid>
             </Paper>
           )}
+        </Grid>
+
+        {/* Enhanced Sales Line Chart */}
+        <Grid item xs={12} lg={8}>
+          <Paper elevation={3} sx={{ padding: '20px', backgroundColor: colors.lightBlue }}>
+            <Typography variant="h6" gutterBottom color={colors.purple}>
+              Sales Trend (Last 30 Days)
+            </Typography>
+            <ResponsiveContainer width="100%" height={350}>
+              <LineChart data={salesData}>
+                <defs>
+                  <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={colors.purple} stopOpacity={0.8} />
+                    <stop offset="95%" stopColor={colors.purple} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
+                <XAxis dataKey="date" stroke={colors.purple} />
+                <YAxis stroke={colors.purple} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: colors.white, borderColor: colors.purple }}
+                  labelStyle={{ color: colors.purple }}
+                />
+                <Legend verticalAlign="top" align="right" height={36} />
+                <Line
+                  type="monotone"
+                  dataKey="sales"
+                  stroke={colors.purple}
+                  strokeWidth={3}
+                  fillOpacity={1}
+                  fill="url(#colorUv)"
+                  dot={{ stroke: colors.purple, strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 8, fill: colors.purple }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </Paper>
+        </Grid>
+
+        {/* Bar Chart: Sales by Quarter */}
+        <Grid item xs={12} lg={4}>
+          <Paper elevation={3} sx={{ padding: '20px', backgroundColor: colors.lightPurple }}>
+            <Typography variant="h6" gutterBottom color={colors.purple}>
+              Quarterly Sales
+            </Typography>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={salesData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="sales" fill={colors.blue} />
+              </BarChart>
+            </ResponsiveContainer>
+          </Paper>
         </Grid>
       </Grid>
     </Box>

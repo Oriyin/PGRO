@@ -100,12 +100,19 @@ async def update_cart_item(product_id: int, cart_item: CartItem):
 
     return {"message": "Cart item updated successfully!", "item": updated_item}
 
+import json
+from fastapi import APIRouter, HTTPException
+from datetime import datetime
+import pytz  # To handle timezones
+
+router = APIRouter()
+
 @router.post("/checkout")
 async def checkout(order: Order):
     # Validate the order and process it
     if not order.username or not order.items:
         raise HTTPException(status_code=400, detail="Invalid order data")
-
+    
     # Prepare the items as a JSON string
     items_json = json.dumps([{"product_id": item.product_id, "quantity": item.quantity} for item in order.items])
 
@@ -120,16 +127,17 @@ async def checkout(order: Order):
     RETURNING id
     """
     
-    total_amount = order.total_amount
     try:
+        total_amount = order.total_amount
         order_id = await database.execute(query, values={
             "username": order.username, 
             "total_amount": total_amount,
             "items": items_json,  # Insert items as a JSON string
-            "created_at": current_time  # Directly use timezone-aware datetime
+            "created_at": current_time  # Save the current time in Thailand timezone
         })
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error inserting order: {str(e)}")
+        print(f"Error inserting order: {e}")  # Log the error for debugging
+        raise HTTPException(status_code=500, detail="Error creating order")
 
     # Update product quantities and remove items from the cart
     for item in order.items:

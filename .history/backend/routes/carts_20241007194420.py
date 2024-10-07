@@ -119,17 +119,13 @@ async def checkout(order: Order):
     VALUES (:username, :total_amount, :items, :created_at)
     RETURNING id
     """
-    
     total_amount = order.total_amount
-    try:
-        order_id = await database.execute(query, values={
-            "username": order.username, 
-            "total_amount": total_amount,
-            "items": items_json,  # Insert items as a JSON string
-            "created_at": current_time  # Directly use timezone-aware datetime
-        })
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error inserting order: {str(e)}")
+    order_id = await database.execute(query, values={
+        "username": order.username, 
+        "total_amount": total_amount,
+        "items": items_json,  # Insert items as a JSON string
+        "created_at": current_time  # Save the current time in Thailand timezone
+    })
 
     # Update product quantities and remove items from the cart
     for item in order.items:

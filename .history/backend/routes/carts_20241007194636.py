@@ -126,7 +126,7 @@ async def checkout(order: Order):
             "username": order.username, 
             "total_amount": total_amount,
             "items": items_json,  # Insert items as a JSON string
-            "created_at": current_time  # Directly use timezone-aware datetime
+            "created_at": current_time.isoformat()  # Ensure it's sent as a string
         })
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error inserting order: {str(e)}")
