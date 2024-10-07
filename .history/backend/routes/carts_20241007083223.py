@@ -99,29 +99,21 @@ async def update_cart_item(product_id: int, cart_item: CartItem):
 
 
 ## New endpoint for checking out
-import json
-
+<<<<<<< Updated upstream
 @router.post("/checkout")
 async def checkout(order: Order):
     # Validate the order and process it
     if not order.username or not order.items:
         raise HTTPException(status_code=400, detail="Invalid order data")
 
-    # Prepare the items as a JSON string
-    items_json = json.dumps([{"product_id": item.product_id, "quantity": item.quantity} for item in order.items])
-
-    # Create the order, inserting items as JSON
+    # Create the order
     query = """
-    INSERT INTO orders (username, total_amount, items)
-    VALUES (:username, :total_amount, :items)
+    INSERT INTO orders (username, total_amount)
+    VALUES (:username, :total_amount)
     RETURNING id
     """
     total_amount = order.total_amount
-    order_id = await database.execute(query, values={
-        "username": order.username, 
-        "total_amount": total_amount,
-        "items": items_json  # Insert items as a JSON string
-    })
+    order_id = await database.execute(query, values={"username": order.username, "total_amount": total_amount})
 
     # Update product quantities and remove items from the cart
     for item in order.items:
@@ -140,3 +132,57 @@ async def checkout(order: Order):
         await delete_cart_item(product_id, order.username)
 
     return {"message": "Order placed successfully!", "order_id": order_id}
+=======
+import json  # เพิ่มการนำเข้า json สำหรับการแปลงข้อมูลเป็น JSON string
+
+@router.post("/checkout")
+async def checkout(order: Order):
+    try:
+        # Validate the order and process it
+        if not order.username or not order.items:
+            raise HTTPException(status_code=400, detail="Invalid order data")
+
+        # Serialize the items to JSON string for storage in the 'items' column
+        serialized_items = json.dumps([{"product_id": item.product_id, "quantity": item.quantity} for item in order.items])
+
+        # Create the order in the orders table with items in JSONB format
+        query = """
+        INSERT INTO orders (username, total_amount, items)
+        VALUES (:username, :total_amount, :items)
+        RETURNING id
+        """
+        total_amount = order.total_amount
+
+        # Log the query data for debugging
+        print(f"Placing order for username: {order.username}, total_amount: {total_amount}, items: {serialized_items}")
+
+        order_id = await database.execute(query, values={
+            "username": order.username,
+            "total_amount": total_amount,
+            "items": serialized_items  # ส่งข้อมูล serialized_items ในรูปแบบ JSON string
+        })
+
+        # Update product quantities and remove items from the cart
+        for item in order.items:
+            product_id = item.product_id
+            quantity = item.quantity
+
+            # Update the product stock
+            product_query = """
+            UPDATE products
+            SET quantity = quantity - :quantity
+            WHERE id = :product_id
+            """
+            print(f"Updating product {product_id} stock, reducing by {quantity}")
+            await database.execute(product_query, values={"product_id": product_id, "quantity": quantity})
+
+            # Remove the item from the user's cart
+            await delete_cart_item(product_id, order.username)
+
+        return {"message": "Order placed successfully!", "order_id": order_id}
+
+    except Exception as e:
+        # Log the actual exception message for debugging
+        print(f"Error during checkout: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to process checkout: {str(e)}")
+>>>>>>> Stashed changes

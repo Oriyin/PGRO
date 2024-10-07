@@ -51,11 +51,8 @@ async def create_user(user: UserCreate):
        raise HTTPException(status_code=400, detail="Error creating user")
    return result
 
-@router.get("/users/total")
-async def get_total_users():
-    query = "SELECT COUNT(*) as total_users FROM users"
-    result = await database.fetch_one(query)
-    return {"totalUsers": result["total_users"]}
+
+
 
 # Endpoint to get a user by user_id
 @router.get("/users/{user_id}", response_model=User)

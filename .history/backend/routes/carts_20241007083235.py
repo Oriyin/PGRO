@@ -99,29 +99,20 @@ async def update_cart_item(product_id: int, cart_item: CartItem):
 
 
 ## New endpoint for checking out
-import json
-
 @router.post("/checkout")
 async def checkout(order: Order):
     # Validate the order and process it
     if not order.username or not order.items:
         raise HTTPException(status_code=400, detail="Invalid order data")
 
-    # Prepare the items as a JSON string
-    items_json = json.dumps([{"product_id": item.product_id, "quantity": item.quantity} for item in order.items])
-
-    # Create the order, inserting items as JSON
+    # Create the order
     query = """
-    INSERT INTO orders (username, total_amount, items)
-    VALUES (:username, :total_amount, :items)
+    INSERT INTO orders (username, total_amount)
+    VALUES (:username, :total_amount)
     RETURNING id
     """
     total_amount = order.total_amount
-    order_id = await database.execute(query, values={
-        "username": order.username, 
-        "total_amount": total_amount,
-        "items": items_json  # Insert items as a JSON string
-    })
+    order_id = await database.execute(query, values={"username": order.username, "total_amount": total_amount})
 
     # Update product quantities and remove items from the cart
     for item in order.items:

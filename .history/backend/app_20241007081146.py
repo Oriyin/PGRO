@@ -23,5 +23,4 @@ app.include_router(admin.router, prefix="/api")
 app.include_router(products.router, prefix="/api")
 
 app.include_router(carts.router, prefix="/api")
-
 app.include_router(dashboard.router, prefix="/api")
