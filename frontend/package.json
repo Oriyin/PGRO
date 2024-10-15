@@ -24,11 +24,11 @@
     "decimal.js": "^10.4.3",
     "js-cookie": "^3.0.5",
     "lodash": "^4.17.21",
-    "next": "^14.2.13",
+    "next": "^14.2.15",
     "react": "^18",
     "react-dom": "^18",
     "recharts": "^2.12.7",
-    "sweetalert2": "^11.14.1",
+    "sweetalert2": "^11.6.13",
     "zustand": "^4.5.4"
   }
 }

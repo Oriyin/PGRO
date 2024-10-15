@@ -1,0 +1,52 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #8b33f7; /* Dark Purple */
+    padding: 10px 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+  
+  .logo {
+    color: #fff; /* White */
+    font-size: 24px;
+    text-decoration: none;
+  }
+  
+  .navbar {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+  }
+  
+  .navLink {
+    color: #fff; /* White */
+    text-decoration: none;
+    padding: 10px 15px;
+    transition: background 0.3s, color 0.3s;
+  }
+  
+  .navLink:hover {
+    background-color: #7E57C2; /* Lighter Purple */
+    border-radius: 5px;
+    color: #fff; /* White */
+  }
+  
+  /* Optional: Add media queries for responsiveness */
+  @media (max-width: 768px) {
+    .navbar {
+      flex-direction: column;
+      display: none; /* Hide the navbar by default */
+    }
+  
+    .bx-menu {
+      display: block; /* Show the menu icon */
+      cursor: pointer;
+    }
+  
+    /* Show navbar when menu icon is clicked */
+    .header.active .navbar {
+      display: flex; /* Show the navbar */
+    }
+  }
+  
